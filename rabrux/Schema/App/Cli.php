@@ -53,8 +53,12 @@ class Cli
           $this->listCmd();
           break;
 
+        case 'create':
+          $this->createCmd();
+          break;
+
         default:
-          $this->unknowndCommand($arg);
+          $this->unknownCommand($arg);
           break;
       }
 
@@ -117,6 +121,76 @@ class Cli
     return $servers;
   }
 
+  public function createCmd() {
+    $arg = $this->getArgument();
+
+    if ( !$this->configExists() )
+      return false;
+
+    switch ( $arg ) {
+      case 'migration':
+        $this->createMigration();
+        break;
+
+      default:
+        $this->unknownCommand($arg);
+        break;
+    }
+
+  }
+
+  public function createMigration() {
+    $arg = $this->getArgument();
+
+    if ( $arg ) {
+      // if schema is authorized to create
+      if ( $this->schemaExists($arg) ) {
+        echo Messages::buildMessage(null, 'please enter database information:');
+        echo Messages::buildMessage(Messages::PROMPT, 'name');
+        $schema['database']['name'] = trim(fgets(STDIN));
+        echo Messages::buildMessage(Messages::PROMPT, 'collation', 'utf-8');
+        $collation = trim(fgets(STDIN));
+        $schema['database']['collation'] = $collation == '' ? 'utf8_general_ci': $collation;
+        echo Messages::buildMessage(Messages::PROMPT, 'table prefix');
+        $schema['database']['tablePrefix'] = trim(fgets(STDIN));
+        echo Messages::buildMessage(Messages::PROMPT, 'engine', 'InnoDB');
+        $engine = trim(fgets(STDIN));
+        $schema['database']['engine'] = $engine == '' ? 'InnoDB' : $engine;
+        // Foreign keys config
+        $schema['foreignKeys'] = null;
+        // If user set example code
+        if ($this->getArgument() == 'example') {
+          // Default user table example
+          $schema['tables']['user'] = array(
+            'fields' => array(
+              'id' => 'pk',
+              'user' => 'varchar(30) not null',
+              'pass' => 'varchar(32) not null',
+              'createdAt' => 'int(10) not null',
+              'updatedAt' => 'int(10) not null'
+            ),
+            'keys' => array(
+              'unique' => 'user'
+            )
+          );
+        } else
+          $schema['tables'] = null;
+
+        // Dump json into file
+        if ( $this->fileManager->dumpJSON("$arg.json", $schema) )
+          echo Messages::buildMessage(Messages::SUCCESS, 'migration file was created without errors');
+        else {
+          echo Messages::buildMessage(Messages::ERROR, 'migration file can not be created');
+          echo Messages::buildMessage(null, 'please check if directory is writable');
+        }
+      }
+    } else {
+      echo Messages::buildMessage(Messages::ERROR, 'migration name was not specified');
+      return false;
+    }
+
+  }
+
   /**
    * List function, generates action when argument is known
    */
@@ -133,8 +207,12 @@ class Cli
         $this->listServers();
         break;
 
+      case 'migrations':
+        $this->listMigrations();
+        break;
+
       default:
-        var_dump('default');
+        $this->unknownCommand($arg);
         break;
     }
 
@@ -163,19 +241,37 @@ class Cli
 
   }
 
-  // if (file_exists('schemas/.conf.json')) {
-  //   $conf = json_decode( file_get_contents('schemas/.conf.json') );
-  //   if ($conf == NULL) {
-  //     echo ERROR . "Error: Configuration file have syntax errors.\n";
-  //     break;
-  //   }
-  //   foreach ($conf as $server => $params) {
-  //     echo SUCCESS . "- " . OUT . $server . "\n";
-  //   }
-  // } else {
-  //   echo ERROR . "Error: Configuration file do not exists.\n";
-  // }
+  /**
+   * list all migrations on directory schemas
+   */
+  public function listMigrations() {
+    $migrations = ($this->fileManager->getMigrations());
+    foreach ($migrations as $file) {
+      echo Messages::buildMessage(Messages::OUT, $file);
+    }
+  }
 
+  /**
+   * schema exists
+   * returns true if not exists or is athorized to overwrite
+   * @return bool
+   */
+  protected function schemaExists($schema) {
+    if ( $this->fileManager->schemaExists($schema)) {
+      echo Messages::buildMessage(Messages::WARNING, 'migration exists');
+      echo Messages::buildMessage(Messages::QUESTION, 'would you like to overwrite it', 'y/N');
+      if (strtolower(trim(fgets(STDIN))) === 'y')
+        return true;
+      else
+        return false;
+    }
+    return true;
+  }
+
+  /**
+   * Actions to config file exists
+   * @return bool
+   */
   protected function configExists() {
     if ( !$this->fileManager->configExists() ) {
       echo Messages::buildMessage(Messages::WARNING, 'config file not exists');
@@ -188,7 +284,7 @@ class Cli
   /**
    * Unknown command messgae
    */
-  public function unknowndCommand($command) {
+  public function unknownCommand($command) {
     echo Messages::buildMessage(Messages::UNKNOWN, $command);
     echo Messages::buildMessage(null, 'please use help command.');
   }

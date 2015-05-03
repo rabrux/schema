@@ -56,6 +56,19 @@ class Files {
   }
 
   /**
+  * Return all migrations in schemas directory
+  * @return array
+  */
+  public function getMigrations() {
+    $dir = opendir( $this->getDirectory() . 'schemas' );
+    while ($file = readdir($dir)) {
+      if (preg_match('/^(?!\.).*\.json$/', $file))
+        $schemas[] = pathinfo($file)['filename'];
+    }
+    return $schemas;
+  }
+
+  /**
    * Create schema directory, if it is created returns true
    * @return bool
    */

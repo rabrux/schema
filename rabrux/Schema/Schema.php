@@ -4,8 +4,8 @@ namespace Schema;
 
 // use Schema\Database\Structure;
 use Schema\App\Cli;
-use Schema\App\Files;
-use Schema\App\Messages;
+// use Schema\App\Files;
+// use Schema\App\Messages;
 
 /**
  *
