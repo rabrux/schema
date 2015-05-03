@@ -36,9 +36,15 @@ class Files {
   }
 
   public function readJSON($file) {
-    $json = json_decode( file_get_contents($this->getDirectory() . "schemas/$file") );
+    $json = json_decode( file_get_contents($this->getDirectory() . "schemas/$file"), true );
     if ($json)
       return $json;
+    return false;
+  }
+
+  public function removeSchema($schema) {
+    if ( unlink($this->getDirectory() . "schemas/$schema.json") )
+      return true;
     return false;
   }
 

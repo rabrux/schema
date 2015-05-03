@@ -57,6 +57,10 @@ class Cli
           $this->createCmd();
           break;
 
+        case 'remove':
+          $this->removeCmd();
+          break;
+
         default:
           $this->unknownCommand($arg);
           break;
@@ -121,6 +125,81 @@ class Cli
     return $servers;
   }
 
+  protected function removeCmd() {
+
+    $arg = $this->getArgument();
+
+    switch ( $arg ) {
+      case 'server':
+        $this->removeServer();
+        break;
+
+      case 'migration':
+        $this->removeMigration();
+        break;
+
+      default:
+        $this->unknownCommand($arg);
+        break;
+    }
+
+
+  }
+
+  protected function removeMigration() {
+    $schema = $this->getArgument();
+
+    if ($schema) {
+      if ( $this->fileManager->schemaExists($schema)) {
+        echo Messages::buildMessage(Messages::QUESTION, "would you like to remove $schema migration", 'Y/n');
+        if (strtolower(trim(fgets(STDIN))) === 'y')
+          if ( $this->fileManager->removeSchema($schema) )
+            echo Messages::buildMessage(Messages::SUCCESS, 'migration was removed');
+          else {
+            echo Messages::buildMessage(Messages::ERROR, 'migration can not be removed');
+            echo Messages::buildMessage(null, 'please check if schemas directory is writable.');
+          }
+      } else {
+        echo Messages::buildMessage(Messages::ERROR, 'migration not exists');
+        echo Messages::buildMessage(null, 'please list migrations before remove');
+      }
+    } else
+      echo Messages::buildMessage(Messages::ERROR, 'migration name not specified');
+  }
+
+  protected function removeServer() {
+    // getting the servername to be removed
+    $serverName = $this->getArgument();
+
+    if ( !$this->configExists() )
+      return false;
+
+    if ( $serverName ) {
+      $conf = $this->fileManager->readJSON('.conf.json');
+
+      if ( !$conf ) {
+        echo Messages::buildMessage(Messages::WARNING, 'config file have a syntax errors');
+        return false;
+      }
+
+      if ($conf[$serverName]) {
+        unset($conf[$serverName]);
+        if ( $this->fileManager->dumpJSON('.conf.json', $conf) )
+          echo Messages::buildMessage(Messages::SUCCESS, 'server was deleted');
+        else {
+          echo Messages::buildMessage(Messages::ERROR, 'config can not be saved');
+          echo Messages::buildMessage(null, 'please check if directory is writable');
+        }
+      } else
+        echo Messages::buildMessage(Messages::ERROR, 'the specified server is not present in config file');
+
+    } else
+      echo Messages::buildMessage(Messages::ERROR, 'server name not specified');
+  }
+
+  /**
+   * create command
+   */
   public function createCmd() {
     $arg = $this->getArgument();
 
@@ -128,6 +207,10 @@ class Cli
       return false;
 
     switch ( $arg ) {
+
+      case 'server':
+        $this->createServer();
+        break;
       case 'migration':
         $this->createMigration();
         break;
@@ -139,6 +222,34 @@ class Cli
 
   }
 
+  /**
+   * Add one or more servers to conf file
+   */
+  protected function createServer() {
+    if ( !$this->configExists() )
+      return false;
+
+    $conf = $this->fileManager->readJSON('.conf.json');
+
+    if ( !$conf ) {
+      echo Messages::buildMessage(Messages::WARNING, 'config file have a syntax errors');
+      return false;
+    }
+
+    $conf = $this->addServers($conf);
+
+    if ( $this->fileManager->dumpJSON('.conf.json', $conf) )
+      echo Messages::buildMessage(Messages::SUCCESS, 'configuration file was created without errors');
+    else {
+      echo Messages::buildMessage(Messages::ERROR, 'config file can not be created');
+      echo Messages::buildMessage(null, 'please check if directory is writable');
+    }
+
+  }
+
+  /**
+   * Create migration, if example is set, it generate a sample schema table into migration
+   */
   public function createMigration() {
     $arg = $this->getArgument();
 
