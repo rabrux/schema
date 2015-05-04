@@ -14,6 +14,7 @@ class Messages
   const ERROR     = "ERROR";
   const WARNING   = "WARNING";
   const QUESTION  = "QUESTION";
+  const OPTION  = "OPTION";
   const UNKNOWN   = "UNKNOWN";
   const CONSOLE   = "CONSOLE";
   const PROMPT    = "PROMPT";
@@ -52,6 +53,10 @@ class Messages
 
       case 'question':
         return Messages::COLORS['CONSOLE'] . "$message" . Messages::COLORS['SUCCESS'] . '? ' . Messages::COLORS['CONSOLE'] . ($default ? '(' . Messages::COLORS['WARNING'] . $default . Messages::COLORS['CONSOLE'] . '): ' : ': ' ) . Messages::COLORS['PROMPT'];
+        break;
+
+      case 'option':
+        return Messages::COLORS['CONSOLE'] . "[ " . Messages::COLORS['WARNING'] . $default . Messages::COLORS['CONSOLE'] . " ] $message\n";
         break;
 
       case 'unknown':

@@ -61,6 +61,10 @@ class Cli
           $this->removeCmd();
           break;
 
+        case 'execute':
+          $this->executeCmd();
+          break;
+
         default:
           $this->unknownCommand($arg);
           break;
@@ -113,6 +117,9 @@ class Cli
       echo Messages::buildMessage(null, 'please enter host information:');
       echo Messages::buildMessage(Messages::PROMPT, 'name');
       $name = trim(fgets(STDIN));
+      echo Messages::buildMessage(Messages::PROMPT, 'driver', 'mysql');
+      $driver = trim(fgets(STDIN));
+      $servers[$name]['driver'] = $driver !== '' ? $driver : 'mysql';
       echo Messages::buildMessage(Messages::PROMPT, 'host address');
       $servers[$name]['host'] = trim(fgets(STDIN));
       echo Messages::buildMessage(Messages::PROMPT, 'user');
@@ -125,6 +132,98 @@ class Cli
     return $servers;
   }
 
+  /**
+   * Execute actions, dump schemas to database server
+   */
+  protected function executeCmd() {
+
+    $schema = $this->getArgument();
+
+    if (!$schema) {
+      echo Messages::buildMessage(Messages::ERROR, 'migration schema not specified');
+      return false;
+    }
+
+    if (!$this->fileManager->schemaExists($schema)) {
+      echo Messages::buildMessage(Messages::ERROR, 'migration schema not found');
+      return false;
+    }
+
+    $conf = $this->fileManager->readJSON('.conf.json');
+
+    if ( !$conf ) {
+      echo Messages::buildMessage(Messages::WARNING, 'config file have a syntax errors');
+      return false;
+    }
+
+    $migration = $this->fileManager->readJSON("$schema.json");
+
+    if ( !$migration ) {
+      echo Messages::buildMessage(Messages::WARNING, 'migration schema have syntas errors');
+      return false;
+    }
+
+    do {
+      echo Messages::buildMessage(null, 'please select the server to migrate selected schema:');
+      echo Messages::buildMessage(null);
+      $i = 0;
+      foreach ($conf as $server => $params) {
+        $option[] = $server;
+        echo Messages::buildMessage(Messages::OPTION, $server, $i++);
+      }
+      echo Messages::buildMessage(Messages::PROMPT, 'option');
+      $response = $option[strtolower( trim( fgets( STDIN ) ) )];
+    } while ( $response == NULL );
+
+    $server = $conf->$response;
+
+    if ($server->driver == 'mysql') {
+      try {
+        $pdo = new \PDO(
+          // 'mysql:host=' . $server->host . ';dbname=' . $migration->database->name,
+          'mysql:host=' . $server->host,
+          $server->username,
+          $server->password,
+          array(
+            \PDO::ATTR_TIMEOUT => '15'
+          )
+        );
+      } catch( \PDOException $e ) {
+        die( Messages::buildMessage(Messages::ERROR, $e->getMessage()) );
+      }
+
+      if ($pdo) {
+        $dbm = new \Schema\DBM\Driver\MySQL($pdo);
+
+        if ( $dbm->database($migration->database->name)->exists() ) {
+
+          echo Messages::buildMessage(Messages::WARNING, 'database exists');
+          echo Messages::buildMessage(Messages::QUESTION, 'would you like to overwrite', 'Y/n');
+          // If not overwrite exit
+          if (strtolower( trim( fgets( STDIN ) ) ) !== 'y')
+            return false;
+
+        }
+
+        if ( !$dbm->database($migration->database->name)->create() ) {
+          echo Messages::buildMessage(Messages::WARNING, 'database not created');
+          return false;
+        }
+
+        if ( !$dbm->migrate($migration) ) {
+          echo Messages::buildMessage(Messages::ERROR, 'migration can not be executed, migration file has errors');
+          echo Messages::buildMessage(null, 'please check the documentation');
+        } else
+          echo Messages::buildMessage(Messages::SUCCESS, 'migration was uploaded');
+
+      }
+    }
+
+  }
+
+  /**
+   * remove command
+   */
   protected function removeCmd() {
 
     $arg = $this->getArgument();
@@ -146,6 +245,9 @@ class Cli
 
   }
 
+  /**
+   * Remove migration schema
+   */
   protected function removeMigration() {
     $schema = $this->getArgument();
 
@@ -175,7 +277,7 @@ class Cli
       return false;
 
     if ( $serverName ) {
-      $conf = $this->fileManager->readJSON('.conf.json');
+      $conf = $this->fileManager->readJSON('.conf.json', true);
 
       if ( !$conf ) {
         echo Messages::buildMessage(Messages::WARNING, 'config file have a syntax errors');
@@ -229,7 +331,7 @@ class Cli
     if ( !$this->configExists() )
       return false;
 
-    $conf = $this->fileManager->readJSON('.conf.json');
+    $conf = $this->fileManager->readJSON('.conf.json', true);
 
     if ( !$conf ) {
       echo Messages::buildMessage(Messages::WARNING, 'config file have a syntax errors');
@@ -259,9 +361,9 @@ class Cli
         echo Messages::buildMessage(null, 'please enter database information:');
         echo Messages::buildMessage(Messages::PROMPT, 'name');
         $schema['database']['name'] = trim(fgets(STDIN));
-        echo Messages::buildMessage(Messages::PROMPT, 'collation', 'utf-8');
+        echo Messages::buildMessage(Messages::PROMPT, 'collation', 'utf8_unicode_ci');
         $collation = trim(fgets(STDIN));
-        $schema['database']['collation'] = $collation == '' ? 'utf8_general_ci': $collation;
+        $schema['database']['collation'] = $collation == '' ? 'utf8_unicode_ci': $collation;
         echo Messages::buildMessage(Messages::PROMPT, 'table prefix');
         $schema['database']['tablePrefix'] = trim(fgets(STDIN));
         echo Messages::buildMessage(Messages::PROMPT, 'engine', 'InnoDB');

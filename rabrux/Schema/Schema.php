@@ -2,10 +2,7 @@
 
 namespace Schema;
 
-// use Schema\Database\Structure;
 use Schema\App\Cli;
-// use Schema\App\Files;
-// use Schema\App\Messages;
 
 /**
  *
@@ -21,24 +18,12 @@ class Schema
     $this->cli = new Cli($argv, $directory);
   }
 
+  /**
+   * Run Commands
+   */
   public function run() {
     $this->cli->run();
   }
-
-  // public function __call($table, array $args) {
-  //   var_dump( $table );
-  //   var_dump( $args );
-  //   \Schema\Database\Structure::algo();
-  // }
-  //
-  // public function __set($name, $value) {
-  //   $this->$name = $value;
-  //   return $this;
-  // }
-  //
-  // public function createTable() {
-  //   var_dump( __METHOD__ );
-  // }
 
   /**
    * autoload class files

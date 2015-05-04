@@ -35,8 +35,8 @@ class Files {
     return false;
   }
 
-  public function readJSON($file) {
-    $json = json_decode( file_get_contents($this->getDirectory() . "schemas/$file"), true );
+  public function readJSON($file, $array = false) {
+    $json = json_decode( file_get_contents($this->getDirectory() . "schemas/$file"), $array );
     if ($json)
       return $json;
     return false;
