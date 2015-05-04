@@ -398,7 +398,7 @@ class Cli
         }
       }
     } else {
-      echo Messages::buildMessage(Messages::ERROR, 'migration name was not specified');
+      echo Messages::buildMessage(Messages::ERROR, 'migration name was not specified, use help');
       return false;
     }
 
@@ -459,8 +459,13 @@ class Cli
    */
   public function listMigrations() {
     $migrations = ($this->fileManager->getMigrations());
-    foreach ($migrations as $file) {
-      echo Messages::buildMessage(Messages::OUT, $file);
+    if ($migrations) {
+      foreach ($migrations as $file) {
+        echo Messages::buildMessage(Messages::OUT, $file);
+      }
+    } else {
+      echo Messages::buildMessage(Messages::WARNING, 'schemas not found');
+      echo Messages::buildMessage(null, 'before list schemas, run create migration command');
     }
   }
 

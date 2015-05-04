@@ -100,11 +100,14 @@ class MySQL extends Driver
       }
     }
 
-    foreach ($data->foreignKeys as $key => $attrs) {
-      $database = $data->database;
-      $to = $attrs->to;
-      $references = $attrs->references;
-      $sql_keys .= "\nALTER TABLE {$database->tablePrefix}{$to->table} ADD CONSTRAINT $key FOREIGN KEY ({$to->column}) REFERENCES {$database->tablePrefix}{$references->table} ({$references->column}) ON UPDATE {$attrs->onUpdate} ON DELETE {$attrs->onDelete};";
+    // Prepare foreign keys statements
+    if ($data->foreignKeys) {
+      foreach ($data->foreignKeys as $key => $attrs) {
+        $database = $data->database;
+        $to = $attrs->to;
+        $references = $attrs->references;
+        $sql_keys .= "\nALTER TABLE {$database->tablePrefix}{$to->table} ADD CONSTRAINT $key FOREIGN KEY ({$to->column}) REFERENCES {$database->tablePrefix}{$references->table} ({$references->column}) ON UPDATE {$attrs->onUpdate} ON DELETE {$attrs->onDelete};";
+      }
     }
 
     // Execute statements
