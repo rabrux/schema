@@ -7,8 +7,19 @@ Schemando is a command line tool created in PHP to handle and dump into many ser
 
 ### Installation
 
-> We're living the future so
-> the present is our past.
+First clone the code
+
+> git clone https://github.com/rabrux/schemando.git
+
+Set execution permisson to schemando file
+
+> chmod +x schemando
+
+Congratulations you have been configure to use schemando
+
+To test run the follow command
+
+> ./schemando help
 
 ### Documentation
 - [Getting Started](http://github.com/rabrux/schemando/wiki).
