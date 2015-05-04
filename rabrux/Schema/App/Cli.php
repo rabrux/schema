@@ -7,7 +7,7 @@
  * @link        http://www.wat.mx
  * @license     http://www.wat.mx/license
  * @version     1.0.0
- * @package     Schema
+ * @package     Schemando
  *
  * MIT LICENSE
  *
@@ -94,6 +94,10 @@ class Cli
 
         case 'execute':
           $this->executeCmd();
+          break;
+
+        case 'help':
+          $this->helpCmd();
           break;
 
         default:
@@ -536,6 +540,98 @@ class Cli
   public function unknownCommand($command) {
     echo Messages::buildMessage(Messages::UNKNOWN, $command);
     echo Messages::buildMessage(null, 'please use help command.');
+  }
+
+  /**
+   * Help
+   */
+  public function helpCmd() {
+
+    // Get command if is null set help by default
+    $command = $this->getArgument();
+    $command = $command == null ? 'help' : $command;
+
+    switch ($command) {
+      case 'help':
+        echo Messages::COLORS['WARNING'] . "Usage:\n";
+        echo Messages::COLORS['CONSOLE'] . "help [command]\n";
+        echo Messages::COLORS['WARNING'] . "\nArguments:\n";
+        echo Messages::COLORS['SUCCESS'] . "command\t\t\t" . Messages::COLORS['CONSOLE'] . "The command name.\n";
+        echo Messages::COLORS['WARNING'] . "\nAvailable commands:\n";
+        echo Messages::COLORS['SUCCESS'] . "create\t\t\t" . Messages::COLORS['CONSOLE'] . "Create new server or migration.\n";
+        echo Messages::COLORS['SUCCESS'] . "execute\t\t\t" . Messages::COLORS['CONSOLE'] . "Dump specified migration schema to server\n";
+        echo Messages::COLORS['SUCCESS'] . "help\t\t\t" . Messages::COLORS['CONSOLE'] . "Display help for itself or specified command.\n";
+        echo Messages::COLORS['SUCCESS'] . "init\t\t\t" . Messages::COLORS['CONSOLE'] . "Initialize a new migration project\n";
+        echo Messages::COLORS['SUCCESS'] . "list\t\t\t" . Messages::COLORS['CONSOLE'] . "List server or migrations\n";
+        echo Messages::COLORS['SUCCESS'] . "remove\t\t\t" . Messages::COLORS['CONSOLE'] . "Remove server or migrations\n";
+        echo Messages::COLORS['WARNING'] . "\nHelp:\n";
+        echo Messages::COLORS['CONSOLE'] . " The " . Messages::COLORS['SUCCESS'] . "help" . Messages::COLORS['CONSOLE'] . " command displays help for a given command:\n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando help init\n";
+        break;
+      case 'init':
+        echo Messages::COLORS['WARNING'] . "Usage:\n";
+        echo Messages::COLORS['CONSOLE'] . "init\n";
+        echo Messages::COLORS['WARNING'] . "\nInit:\n";
+        echo Messages::COLORS['CONSOLE'] . "   The " . Messages::COLORS['SUCCESS'] . "init" . Messages::COLORS['CONSOLE'] . " command initializes a new migration schema configuration.\n   It creates schemas directory in the current directory, in this directory will be storage\n the config file call " . Messages::COLORS['SUCCESS'] . ".conf.json" . Messages::COLORS['CONSOLE'] . " and the migration schemas called file.json where file is\n the name of migration. \n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando init\n";
+        break;
+
+      case 'create':
+        echo Messages::COLORS['WARNING'] . "Usage:\n";
+        echo Messages::COLORS['CONSOLE'] . "create [server|migration]\n";
+        echo Messages::COLORS['WARNING'] . "\nArguments:\n";
+        echo Messages::COLORS['SUCCESS'] . "migration\t\t" . Messages::COLORS['CONSOLE'] . "Creates a new migration schema.\n";
+        echo Messages::COLORS['SUCCESS'] . "server\t\t\t" . Messages::COLORS['CONSOLE'] . "Creates a new server access information.\n";
+        echo Messages::COLORS['WARNING'] . "\nCreate:\n";
+        echo Messages::COLORS['CONSOLE'] . "   The " . Messages::COLORS['SUCCESS'] . "create" . Messages::COLORS['CONSOLE'] . " command have two usages:\n";
+        echo Messages::COLORS['SUCCESS'] . "\n a) " . Messages::COLORS['CONSOLE'] . "Create a new migration schema file into directory schemas.\n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando create migration [migration_name] [example]\n";
+        echo Messages::COLORS['WARNING'] . "\n\tArguments:\n";
+        echo Messages::COLORS['SUCCESS'] . "\tmigration_name\t\t" . Messages::COLORS['CONSOLE'] . "the name of schemas file.\n";
+        echo Messages::COLORS['SUCCESS'] . "\texample\t\t\t" . Messages::COLORS['CONSOLE'] . "create example data into migration file (optional).\n";
+        echo Messages::COLORS['SUCCESS'] . "\n b) " . Messages::COLORS['CONSOLE'] . "Create a new server access information.\n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando create server\n";
+        break;
+
+      case 'execute':
+        echo Messages::COLORS['WARNING'] . "Usage:\n";
+        echo Messages::COLORS['CONSOLE'] . "execute [migration_name]\n";
+        echo Messages::COLORS['WARNING'] . "\nArguments:\n";
+        echo Messages::COLORS['SUCCESS'] . "migration_name\t\t" . Messages::COLORS['CONSOLE'] . "Migration schema to be dumped into host\n";
+        echo Messages::COLORS['WARNING'] . "\nExecute:\n";
+        echo Messages::COLORS['CONSOLE'] . "   The " . Messages::COLORS['SUCCESS'] . "execute" . Messages::COLORS['CONSOLE'] . " command dump the specified schema migration file to server.\n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando execute dummy\n";
+        break;
+
+      case 'list':
+        echo Messages::COLORS['WARNING'] . "Usage:\n";
+        echo Messages::COLORS['CONSOLE'] . "list [servers|migrations]\n";
+        echo Messages::COLORS['WARNING'] . "\nArguments:\n";
+        echo Messages::COLORS['SUCCESS'] . "migrations\t\t" . Messages::COLORS['CONSOLE'] . "List all migrations in schemas directory.\n";
+        echo Messages::COLORS['SUCCESS'] . "servers\t\t\t" . Messages::COLORS['CONSOLE'] . "List all added servers.\n";
+        echo Messages::COLORS['WARNING'] . "\nList:\n";
+        echo Messages::COLORS['CONSOLE'] . "   The " . Messages::COLORS['SUCCESS'] . "list" . Messages::COLORS['CONSOLE'] . " command list servers or migrations in the migration schema project.\n";
+        echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando list servers\n";
+        break;
+
+        case 'remove':
+          echo Messages::COLORS['WARNING'] . "Usage:\n";
+          echo Messages::COLORS['CONSOLE'] . "remove [server|migration] [item_name]\n";
+          echo Messages::COLORS['WARNING'] . "\nArguments:\n";
+          echo Messages::COLORS['SUCCESS'] . "migration\t\t" . Messages::COLORS['CONSOLE'] . "Creates a new migration schema.\n";
+          echo Messages::COLORS['SUCCESS'] . "server\t\t\t" . Messages::COLORS['CONSOLE'] . "Creates a new server access information.\n";
+          echo Messages::COLORS['SUCCESS'] . "item_name\t\t" . Messages::COLORS['CONSOLE'] . "The server or migration name to delete.\n";
+          echo Messages::COLORS['WARNING'] . "\nRemove:\n";
+          echo Messages::COLORS['CONSOLE'] . "   The " . Messages::COLORS['SUCCESS'] . "remove" . Messages::COLORS['CONSOLE'] . " command delete a server or migration specified in item_name argument\n";
+          echo Messages::COLORS['SUCCESS'] . "\n\tphp /path/to/schemando remove server local\n";
+          break;
+
+      default:
+        echo Messages::COLORS['UNKNOWN'] . "Invalid argument\n";
+        break;
+    }
+
+    $this->arguments = array();
   }
 
 }

@@ -8,7 +8,7 @@
  * @link        http://www.wat.mx
  * @license     http://www.wat.mx/license
  * @version     1.0.0
- * @package     Schema
+ * @package     Schemando
  *
  * MIT LICENSE
  *

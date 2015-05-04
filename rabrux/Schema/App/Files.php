@@ -7,7 +7,7 @@
  * @link        http://www.wat.mx
  * @license     http://www.wat.mx/license
  * @version     1.0.0
- * @package     Schema
+ * @package     Schemando
  *
  * MIT LICENSE
  *
@@ -30,7 +30,7 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
- 
+
 namespace Schema\App;
 
 class Files {
