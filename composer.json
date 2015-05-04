@@ -2,13 +2,14 @@
     "name": "rabrux/schema",
     "description": "Schema Cli Migration - PHP command line database schema migration",
     "keywords": ["cli","schema","database", "migration"],
-    "homepage": "http://github.com/rabrux",
+    "homepage": "http://github.com/rabrux/schemando",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
             "name": "Raúl Salvador Andrade",
-            "email": "rsalvador@wat.mx"
+            "email": "rsalvador@wat.mx",
+            "homepage": "http://wat.mx"
         }
     ],
     "require": {
