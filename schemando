@@ -39,8 +39,6 @@ use Schema\Schema;
 // Get first argv, name of script
 array_shift( $argv );
 
-var_dump(getcwd()); exit;
-
-$app = new Schema($argv, __DIR__);
+$app = new Schema($argv, getcwd());
 
 $app->run();
